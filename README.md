@@ -28,22 +28,6 @@
 - Данные: Fast-F1 API
 - Фронтенд: HTML/CSS + Bootstrap
 
-### 3.2. Структура проекта:
-/f1_dashboard
-/templates
-index.html
-race_analysis.html
-/static
-/css
-/js
-/images
-/data_processing
-data_loader.py
-analysis.py
-visualization.py
-app.py
-requirements.txt
-
 ## 4. Этапы разработки
 
 ### Этап 1: Подготовка (Неделя 1)
