@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# FastF1 cache
+cache/
+
+# Generated images
+static/images/
+
 # Distribution / packaging
 .Python
 build/
