@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>f1-analysis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body class="bg-light">
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-danger" href="/">F1 Analysis</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="/">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/analysis">Анализ сессии</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <div class="section">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Результаты анализа</h2>
+      </div>
+
+      <div class="mt-4 p-3">
+        <h5>Детали сессии:</h5>
+        <ul class="mb-0">
+          <li><strong>Год:</strong> {{ year }}</li>
+          <li><strong>Гран-при:</strong> {{ event }}</li>
+          <li><strong>Гонщики:</strong> {{ drivers|join(', ') }}</li>
+        </ul>
+      </div>
+
+      <div class="section mt-4 p-4">
+        <h4 class="mb-4">Итоговая классификация</h4>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Поз.</th>
+                <th>№</th>
+                <th>Гонщик</th>
+                <th>Команда</th>
+                <th>Очки</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for res in session_results %}
+              <tr {% if res.driver in drivers %}class="table-primary fw-bold" {% endif %}>
+                <td>{{ res.position }}</td>
+                <td><span class="badge bg-secondary">{{ res.number }}</span></td>
+                <td>{{ res.driver }}</td>
+                <td>{{ res.team }}</td>
+                <td>{{ res.points }}</td>
+                <td>
+                  {% if res.status == 'Finished' %}
+                  <span class="text-success">Финиш</span>
+                  {% else %}
+                  <span class="text-danger">{{ res.status }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 text-center">
+          <h5 class="section-title text-start">Карта трассы и повороты</h5>
+          <img src="data:image/png;base64,{{ track_map }}">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 text-center">
+          <h5 class="section-title text-start">Карта переключения передач (самое быстрое время круга)</h5>
+          <img src="data:image/png;base64,{{ gear_shifts }}">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 text-center">
+          <h5 class="section-title text-start">Карта скорости (самое быстрое время круга)</h5>
+          <img src="data:image/png;base64,{{ speed_map }}">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 text-center">
+          <h5 class="section-title text-start">График темпа</h5>
+          <img src="data:image/png;base64,{{ plot_data }}">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 text-center">
+          <h5 class="section-title text-start">График темпа</h5>
+          <img src="data:image/png;base64,{{ pos_changes }}">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 text-center">
+          <h5 class="section-title text-start">График сравнения телеметрии</h5>
+          <img src="data:image/png;base64,{{ speed_trace }}">
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

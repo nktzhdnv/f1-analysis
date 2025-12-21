@@ -3,67 +3,138 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>simple-f1-web</title>
+  <title>f1-analysis</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: white;
-      padding: 20px;
-    }
-
-    .graph-section,
-    .race-info,
-    .prediction-block {
-      background: white;
-      padding: 20px;
-      margin: 20px 0;
-    }
-
-    .prediction-header {
-      background: #cf3636;
-      color: white;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
-  <div class="container">
 
-    <div class="text-center mb-4">
-      <h1 style="color: black;">Simple F1</h1>
+  <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-danger" href="/">F1 Analysis</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="/">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/analysis">Анализ сессии</a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <!-- Последняя и след гонки -->
-    <div class="race-info">
+  <div class="container my-4">
+
+    <h1 class="text-center mb-4">F1 Analysis</h1>
+
+    <div class="section">
       <div class="row">
         <div class="col-md-6">
-          <h4>Последняя гонка</h4>
-          <p class="h5 text-success">{{ last_race_name }}</p>
-          <p>{{ last_race_date }}</p>
+          <div class="section-title">Последняя гонка</div>
+          <p class="fw-bold mb-1">{{ last_race_name }}</p>
+          <small class="text-muted">{{ last_race_date }}</small>
         </div>
         <div class="col-md-6">
-          <h4>Следующая гонка</h4>
-          <p class="h5 text-primary">{{ next_race_name }}</p>
-          <p>{{ next_race_date }}</p>
+          <div class="section-title">Следующая гонка</div>
+          <p class="fw-bold mb-1">{{ next_race_name }}</p>
+          <small class="text-muted">{{ next_race_date }}</small>
         </div>
       </div>
     </div>
 
 
-    <div class="prediction-block">
-      <div class="prediction-header text-center">
-        <h3>Прогноз на следующую гонку: {{ next_track_name }}</h3>
+    <div class="section">
+      <div class="section-title">
+        Итоги прошлой гонки: {{ last_race_name }} (совпадение реальности с прогнозом)
       </div>
 
       <div class="row">
-        <!-- Исторические результаты -->
         <div class="col-md-4">
-          <h5>История трассы</h5>
+          <div class="section-title">Наш прогноз (Топ 5)</div>
+          {% if last_track_rating %}
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <thead class="table-light">
+                <tr>
+                  <th>Гонщик</th>
+                  <th>Рейтинг</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for driver in last_track_rating %}
+                <tr>
+                  <td>{{ driver.driver }}</td>
+                  <td>{{ driver.rating }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <div class="section-title">Реальный результат (Топ 5)</div>
+          {% if last_race_results %}
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <thead class="table-light">
+                <tr>
+                  <th>Поз.</th>
+                  <th>Гонщик</th>
+                  <th>Команда</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for res in last_race_results %}
+                <tr>
+                  <td>{{ res.position }}</td>
+                  <td><strong>{{ res.driver }}</strong></td>
+                  <td><small>{{ res.team }}</small></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">Результаты еще не обновлены</p>
+          {% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <div class="section-title">Статус</div>
+          <div class="p-3 text-center">
+            {% if last_race_results and last_track_rating and last_race_results[0].driver == last_track_rating[0].driver
+            %}
+            <h2>АНАЛИЗ</h2>
+            <h2 class="text-success">ПОПАДАНИЕ</h2>
+            <p class="mb-0">Алгоритм верно предсказал победителя! :)</p>
+            {% else %}
+            <h2 class="text-muted">НЕТ ПОПАДАНИЯ В ПОБЕДИТЕЛЯ!</h2>
+            <p class="mb-0">Алгоритм не предсказал победителя :(</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        Прогноз на следующую гонку: {{ next_track_name }}
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="section-title">История трассы</div>
           {% if track_history %}
           <div class="table-responsive">
-            <table class="table table-sm">
+            <table class="table table-sm table-bordered">
               <thead>
                 <tr>
                   <th>Год</th>
@@ -83,16 +154,15 @@
             </table>
           </div>
           {% else %}
-          <p class="text-muted">Исторические данные загружаются...</p>
+          <small class="text-muted">Следующей гонки нет, сезон завершен</small>
           {% endif %}
         </div>
 
-        <!-- Текущая форма -->
         <div class="col-md-4">
-          <h5>Текущая форма, перформанс в сезоне</h5>
+          <div class="section-title">Текущая форма</div>
           {% if current_form %}
           <div class="table-responsive">
-            <table class="table table-sm">
+            <table class="table table-sm table-bordered">
               <thead>
                 <tr>
                   <th>Гонщик</th>
@@ -104,7 +174,7 @@
                 {% for driver in current_form %}
                 <tr>
                   <td>{{ driver.driver }}</td>
-                  <td><strong>{{ driver.avg_points }}</strong></td>
+                  <td>{{ driver.avg_points }}</td>
                   <td>{{ driver.races }}</td>
                 </tr>
                 {% endfor %}
@@ -114,12 +184,11 @@
           {% endif %}
         </div>
 
-        <!-- Рейтинг на трассе -->
-        <div class="col-md-3">
-          <h5>Рейтинг на трассе за последние 3 года</h5>
+        <div class="col-md-4">
+          <div class="section-title">Рейтинг трассы (3 года)</div>
           {% if track_rating %}
           <div class="table-responsive">
-            <table class="table table-sm">
+            <table class="table table-sm table-bordered">
               <thead>
                 <tr>
                   <th>Гонщик</th>
@@ -130,7 +199,7 @@
                 {% for driver in track_rating %}
                 <tr>
                   <td>{{ driver.driver }}</td>
-                  <td><strong>{{ driver.rating }}</strong></td>
+                  <td>{{ driver.rating }}</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -138,75 +207,40 @@
           </div>
           {% endif %}
         </div>
-
-        <!-- Прогноз -->
-        <div class="col-md-4">
-          <h5>Прогноз, тут вообще много всего можно еще</h5>
-          <div class="alert alert-info">
-            {{ expert_prediction }}
-          </div>
-        </div>
       </div>
+
+      <!-- <div class="alert alert-secondary mt-3">
+        {{ expert_prediction }}
+      </div> -->
     </div>
 
-    <div class="mt-3">
-      <h5>Как посчитан рейтинг?</h5>
-      <ul>
-        <li>РЕЙТИНГ = Средние очки + Коэф позиции + Коэф стабильности</li>
-        <li>Средние очки: Все очки гонщика на этой трассе за 3 года делим на количество гонок</li>
-        <li>Коэф позиции: position_bonus = (20 - best_position) * 0.5, например - Победа (1 место): (20 - 1) * 0.5 =
-          9.5, 3 место: (20 - 3) * 0.5 = 8.5, 10 место: (20 - 10) * 0.5 = 5.0</li>
-        <li>Коэф стабильности: consistency_bonus = min(5, 10 / np.std(positions)) - меньше разброс = больше бонус</li>
 
+    <div class="section">
+      <div class="section-title">Как считается рейтинг</div>
+      <ul>
+        <li>Рейтинг = средние очки + бонус позиции + бонус стабильности</li>
+        <li>Бонус позиции: (20 − лучшая позиция) * 0.5</li>
+        <li>Бонус стабильности: min(5, 10 / std(позиций))</li>
       </ul>
     </div>
 
-    {% if track_performance_success %}
-    <div class="graph-section">
-      <h3>Исторические результаты на трассе {{ next_track_name }}</h3>
-      <p>Динамика позиций топ-гонщиков за последние годы (чем выше линия - тем лучше результат)</p>
-      <img src="{{ url_for('static', filename='images/track_performance.png') }}" class="img-fluid"
-        alt="Исторические результаты на трассе">
-      <div class="mt-3">
-        <h5>Анализ:</h5>
-        <ul>
-          <li>Ферстаппен и Леклерк хорошо показывают себя на трассе, шанс победить выше</li>
-        </ul>
-      </div>
-    </div>
+    {% if track_img %}
+    <div class="section-title">История результатов: {{ next_race_name }}</div>
+    <img src="data:image/png;base64,{{ track_img }}" class="img-fluid">
     {% endif %}
 
-    <div class="prediction-block">
-      <div class="prediction-header text-center">
-        <h3>Анализ предыдущей: {{ last_track_name }}</h3>
-      </div>
-      {% if analysis_success %}
-      <div class="graph-section">
-        <h3>Анализ стратегий пит-стопов</h3>
-        <img src="{{ url_for('static', filename='images/pitstop_analysis.png') }}" class="img-fluid"
-          alt="Анализ пит-стопов">
-      </div>
-      {% endif %}
+    {% if laptimes_img %}
+    <div class="section-title">Анализ предыдущей гонки: {{ last_race_name }})</div>
+    <img src="data:image/png;base64,{{ laptimes_img }}" class="img-fluid">
+    {% endif %}
 
-      {% if laptimes_success %}
-      <div class="graph-section">
-        <h3>Сравнение времени кругов</h3>
-        <img src="{{ url_for('static', filename='images/laptimes_analysis.png') }}" class="img-fluid"
-          alt="Сравнение времени кругов">
-        <div class="mt-3">
-          <h5>Анализ:</h5>
-          <ul>
-            <li>По графикам видно, как время круга гонщика сильно возрастает при пит-стопах</li>
-            <li>В начале графика в первое время гонщики мешают друг другу, поэтому происходит возрастание во времени
-              кругов</li>
-            <li>Графики показывают, что когда у команд разное время пит-стопов: у всех время круга падает</li>
-            <li>Несмотря на три пит-стопа у Ферстаппена (VER), его профессионализм позволил встать на подиум</li>
-          </ul>
-        </div>
-      </div>
-      {% endif %}
-    </div>
+    {% if pitstop_img %}
+    <div class="section-title">Анализ стратегий пит-стопов ({{ last_race_name }})</div>
+    <img src="data:image/png;base64,{{ pitstop_img }}" class="img-fluid">
+    {% endif %}
+
   </div>
+
 </body>
 
 </html>

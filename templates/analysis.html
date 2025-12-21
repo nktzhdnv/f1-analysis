@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>f1-analysis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-danger" href="/">F1 Analysis</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="/">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/analysis">Анализ сессии</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <h1 class="text-center mb-4">Анализ гонок F1</h1>
+
+    <div class="section">
+      <h4 class="section-title">Выбор сессии</h4>
+
+      <form action="/perform_analysis" method="POST" id="analysis-form">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label">Сезон</label>
+            <select class="form-select" name="year" id="season-select" onchange="loadEvents()">
+              {% for season in seasons %}
+              <option value="{{ season }}" {% if season==current_year %}selected{% endif %}>{{ season }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Гран-при</label>
+            <select class="form-select" name="event" id="event-select">
+              {% for event in events %}
+              <option value="{{ event.name }}">{{ event.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Тип сессии</label>
+            <select class="form-select" name="session" id="session-select">
+              {% for s in session_types %}
+              <option value="{{ s.value }}">{{ s.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="button" class="btn btn-danger w-100" onclick="loadDrivers()">
+              Найти гонщиков
+            </button>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div id="drivers-selection-area">
+          <p class="text-muted">Сначала выберите сессию и нажмите «Найти гонщиков»</p>
+        </div>
+
+        <div id="loading-indicator" class="text-center my-4" style="display: none;">
+          <div class="spinner-border text-danger" role="status"></div>
+        </div>
+      </form>
+    </div>
+
+    <div id="analysis-results">
+      {% if plot_data %}
+      <div class="section mt-4">
+        <h4 class="section-title">Результаты анализа</h4>
+        <img src="data:image/png;base64,{{ plot_data }}" class="img-fluid rounded border">
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    async function loadEvents() { // загрузка событий при выборе сезона
+      const year = document.getElementById('season-select').value;
+      const eventSelect = document.getElementById('event-select');
+
+      eventSelect.disabled = true;
+      const response = await fetch(`/api/events/${year}`);
+      const data = await response.json();
+
+      eventSelect.innerHTML = '';
+      data.events.forEach(event => {
+        const option = document.createElement('option');
+        option.value = event.name;
+        option.textContent = event.name;
+        eventSelect.appendChild(option);
+      });
+      eventSelect.disabled = false;
+    }
+
+    async function loadDrivers() { // загрузка гонщиков при выборе сессии
+      const year = document.getElementById('season-select').value;
+      const event = document.getElementById('event-select').value;
+      const session = document.getElementById('session-select').value;
+
+      const container = document.getElementById('drivers-selection-area');
+      const loader = document.getElementById('loading-indicator');
+
+      container.innerHTML = '';
+      loader.style.display = 'block';
+
+      try {
+        const response = await fetch('/get_drivers_list', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ year, event, session })
+        });
+
+        if (!response.ok) throw new Error('Ошибка сервера');
+
+        const html = await response.text();
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = `<div class="alert">Не удалось загрузить гонщиков: ${e.message}</div>`;
+      } finally {
+        loader.style.display = 'none';
+      }
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

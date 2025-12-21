@@ -1,0 +1,27 @@
+@font-face {
+  font-family: 'Dela Gothic One';
+  src: url('../fonts/DelaGothicOne-Regular.ttf') format('truetype');
+  font-weight: lighter;
+  font-style: normal;
+  font-display: swap;
+}
+
+h1,
+.navbar-brand {
+  font-family: 'Dela Gothic One';
+}
+
+.section {
+  background: white;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.nav-link.active {
+  font-weight: 600;
+}
